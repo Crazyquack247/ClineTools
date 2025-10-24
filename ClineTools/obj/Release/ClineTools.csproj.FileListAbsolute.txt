@@ -1,0 +1,12 @@
+C:\Users\jbarnes\source\repos\ClineTools\bin\Release\ClineTools.dll
+C:\Users\jbarnes\source\repos\ClineTools\bin\Release\ClineTools.tlb
+C:\Users\jbarnes\source\repos\ClineTools\bin\Release\SolidWorksTools.dll
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.csproj.AssemblyReference.cache
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.csproj.CoreCompileInputs.cache
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.csproj.Up2Date
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.dll
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.Modules.OnSave.OnSaveMenu.resources
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.csproj.GenerateResource.cache
+C:\Users\jbarnes\source\repos\ClineTools\bin\Release\Microsoft.WindowsAPICodePack.dll
+C:\Users\jbarnes\source\repos\ClineTools\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.Properties.Resources.resources

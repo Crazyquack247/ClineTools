@@ -1,0 +1,9 @@
+C:\Users\jbarnes\source\repos\ClineTools\bin\Debug\ClineTools.dll
+C:\Users\jbarnes\source\repos\ClineTools\bin\Debug\ClineTools.pdb
+C:\Users\jbarnes\source\repos\ClineTools\bin\Debug\ClineTools.tlb
+C:\Users\jbarnes\source\repos\ClineTools\bin\Debug\SolidWorksTools.dll
+C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.csproj.AssemblyReference.cache
+C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.csproj.CoreCompileInputs.cache
+C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.csproj.Up2Date
+C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.dll
+C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.pdb
