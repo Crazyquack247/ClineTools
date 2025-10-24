@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jbarnes\\source\\repos\\ClineTools\\ClineTools.csproj": {}
+    "C:\\Users\\jbarnes\\OneDrive - AFC Industries\\Documents\\GitHub\\ClineTools\\ClineTools\\ClineTools.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jbarnes\\source\\repos\\ClineTools\\ClineTools.csproj": {
+    "C:\\Users\\jbarnes\\OneDrive - AFC Industries\\Documents\\GitHub\\ClineTools\\ClineTools\\ClineTools.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jbarnes\\source\\repos\\ClineTools\\ClineTools.csproj",
+        "projectUniqueName": "C:\\Users\\jbarnes\\OneDrive - AFC Industries\\Documents\\GitHub\\ClineTools\\ClineTools\\ClineTools.csproj",
         "projectName": "ClineTools",
-        "projectPath": "C:\\Users\\jbarnes\\source\\repos\\ClineTools\\ClineTools.csproj",
+        "projectPath": "C:\\Users\\jbarnes\\OneDrive - AFC Industries\\Documents\\GitHub\\ClineTools\\ClineTools\\ClineTools.csproj",
         "packagesPath": "C:\\Users\\jbarnes\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jbarnes\\source\\repos\\ClineTools\\obj\\",
+        "outputPath": "C:\\Users\\jbarnes\\OneDrive - AFC Industries\\Documents\\GitHub\\ClineTools\\ClineTools\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
         "UsingMicrosoftNETSdk": false,

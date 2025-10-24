@@ -7,3 +7,16 @@ C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.csproj.CoreCompile
 C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.csproj.Up2Date
 C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.dll
 C:\Users\jbarnes\source\repos\ClineTools\obj\Debug\ClineTools.pdb
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.csproj.AssemblyReference.cache
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.Modules.OnSave.OnSaveMenu.resources
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.Properties.Resources.resources
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.csproj.GenerateResource.cache
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.csproj.CoreCompileInputs.cache
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.dll
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.pdb
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\bin\Debug\ClineTools.dll
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\bin\Debug\ClineTools.pdb
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\bin\Debug\ClineTools.tlb
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\bin\Debug\Microsoft.WindowsAPICodePack.dll
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\bin\Debug\Microsoft.WindowsAPICodePack.Shell.dll
+C:\Users\jbarnes\OneDrive - AFC Industries\Documents\GitHub\ClineTools\ClineTools\obj\Debug\ClineTools.csproj.Up2Date
