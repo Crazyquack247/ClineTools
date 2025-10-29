@@ -200,7 +200,7 @@ namespace ClineTools
                 iBmp = new BitmapHandler();
             Assembly thisAssembly;
             int cmdIndex0, cmdIndex1;
-            string Title = "C# Addin", ToolTip = "C# Addin";
+            string Title = "Cline Tools", ToolTip = "Cline Tools";
 
 
             int[] docTypes = new int[]{(int)swDocumentTypes_e.swDocASSEMBLY,
@@ -234,7 +234,7 @@ namespace ClineTools
             cmdGroup.SmallMainIcon = iBmp.CreateFileFromResourceBitmap("ClineTools.MainIconSmall.bmp", thisAssembly);
 
             int menuToolbarOption = (int)(swCommandItemType_e.swMenuItem | swCommandItemType_e.swToolbarItem);
-            cmdIndex0 = cmdGroup.AddCommandItem2("CreateCube", -1, "Create a cube", "Create cube", 0, "CreateCube", "", mainItemID1, menuToolbarOption);
+            cmdIndex0 = cmdGroup.AddCommandItem2("Create Offset Plane", -1, "Create a plane at distance", "Create Plane", 0, "CreateOffsetPlane", "", mainItemID1, menuToolbarOption);
             cmdIndex1 = cmdGroup.AddCommandItem2("Show PMP", -1, "Display sample property manager", "Show PMP", 2, "ShowPMP", "EnablePMP", mainItemID2, menuToolbarOption);
 
             cmdGroup.HasToolbar = true;

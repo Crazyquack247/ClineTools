@@ -133,6 +133,7 @@
       <DependentUpon>OnSaveMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Modules\OnSave\OnSaveModule.cs" />
+    <Compile Include="Modules\RakeGen\RakeGenModule.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
