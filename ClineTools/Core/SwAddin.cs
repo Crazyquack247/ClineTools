@@ -1,4 +1,4 @@
-using SolidWorks.Interop.sldworks;
+﻿using SolidWorks.Interop.sldworks;
 using SolidWorks.Interop.swconst;
 using SolidWorks.Interop.swpublished;
 using SolidWorksTools;
@@ -6,12 +6,15 @@ using SolidWorksTools.File;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace ClineTools
 {
-    [Guid("ebd88e14-faa0-4384-86d5-8b2829475b1a"), ComVisible(true)]
+    [Guid("ebd88e14-faa0-4384-86d5-8b2829475b2a"), ComVisible(true)]
     [SwAddin(
         Description = "Cline Tool macro library",
         Title = "ClineTools",
@@ -234,8 +237,10 @@ namespace ClineTools
             cmdGroup.SmallMainIcon = iBmp.CreateFileFromResourceBitmap("ClineTools.MainIconSmall.bmp", thisAssembly);
 
             int menuToolbarOption = (int)(swCommandItemType_e.swMenuItem | swCommandItemType_e.swToolbarItem);
-            cmdIndex0 = cmdGroup.AddCommandItem2("Create Offset Plane", -1, "Create a plane at distance", "Create Plane", 0, "CreateOffsetPlane", "", mainItemID1, menuToolbarOption);
-            cmdIndex1 = cmdGroup.AddCommandItem2("Show PMP", -1, "Display sample property manager", "Show PMP", 2, "ShowPMP", "EnablePMP", mainItemID2, menuToolbarOption);
+            cmdIndex0 = cmdGroup.AddCommandItem2("Custom Assembly Feature", -1, "Create an offset reference plane in the active assembly",
+                "Asm Feature", 0, "CreateAssemblyPlaneFeature", "EnableOnlyInAssembly", mainItemID1, menuToolbarOption);
+            cmdIndex1 = cmdGroup.AddCommandItem2("Show PMP", -1, "Display sample property manager", "Show PMP", 2, "ShowPMP", "EnablePMP",
+                mainItemID2, menuToolbarOption);
 
             cmdGroup.HasToolbar = true;
             cmdGroup.HasMenu = true;
@@ -389,6 +394,166 @@ namespace ClineTools
             }
         }
 
+        private static bool TryParseDistanceToMeters(string raw, out double meters)
+        {
+            meters = 0;
+            if (string.IsNullOrWhiteSpace(raw)) return false;
+
+            // Normalize: trim, collapse spaces
+            string s = raw.Trim();
+
+            // Regex: capture number and optional unit (e.g., 3, 3.5, 3in, 4 mm, 25.4, etc.)
+            // Groups: 1=number, 2=unit (optional)
+            var m = Regex.Match(s, @"^\s*([+-]?\d+(?:\.\d+)?)\s*([a-z""']+)?\s*$",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+            if (!m.Success) return false;
+
+            if (!double.TryParse(m.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
+                return false;
+
+            string unit = (m.Groups[2].Success ? m.Groups[2].Value : "").Trim().ToLowerInvariant();
+
+            // Supported units:
+            // inches: in, inch, inches, "   (double quote)
+            // millimeters: mm, millimeter, millimeters
+            // default (no unit): inches
+            switch (unit)
+            {
+                case "":
+                case "in":
+                case "inch":
+                case "inches":
+                case "\"":
+                    meters = value * 0.0254;        // inches -> meters
+                    return true;
+
+                case "mm":
+                case "millimeter":
+                case "millimeters":
+                    meters = value / 1000.0;        // mm -> meters
+                    return true;
+
+                // (Optional) quick extras if you ever want them:
+                // case "cm": meters = value / 100.0; return true;
+                // case "m": meters = value; return true;
+
+                default:
+                    return false; // unknown unit
+            }
+        }
+
+        public void CreateAssemblyPlaneFeature()
+        {
+            try
+            {
+                // Ensure we are in an assembly
+                var doc = iSwApp.ActiveDoc as ModelDoc2;
+                if (doc == null || doc.GetType() != (int)swDocumentTypes_e.swDocASSEMBLY)
+                {
+                    System.Windows.Forms.MessageBox.Show("Open an assembly to use this feature.");
+                    return;
+                }
+
+                // Prompt for distance
+                string defaultText = "Offset Reference Plane";
+                string input = Microsoft.VisualBasic.Interaction.InputBox(
+                    "Offset distance from Right Plane",
+                    defaultText
+                );
+                if (string.IsNullOrWhiteSpace(input)) return;
+
+                if (!TryParseDistanceToMeters(input, out double offsetMeters))
+                {
+                    System.Windows.Forms.MessageBox.Show("Could not parse distance. Use proper formatting (e.g. 1.532in, 44mm, etc.");
+                    return;
+                }
+
+                // Clear selection and select the Right Plane
+                doc.ClearSelection2(true);
+                bool sel = doc.Extension.SelectByID2("Right Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
+                if (!sel)
+                {
+                    System.Windows.Forms.MessageBox.Show(
+                        "Could not select 'Right Plane'. Select a plane first or adjust the name for your locale."
+                    );
+                    return;
+                }
+
+                // Create the new reference plane
+                var featMgr = doc.FeatureManager;
+                Feature newPlane = featMgr.InsertRefPlane(
+                    (int)swRefPlaneReferenceConstraints_e.swRefPlaneReferenceConstraint_Distance,
+                    offsetMeters, 0, 0, 0, 0
+                );
+
+                if (newPlane == null)
+                {
+                    System.Windows.Forms.MessageBox.Show("Failed to create reference plane.");
+                    return;
+                }
+
+                // === Rename the plane to LENGTH PLANE, LENGTH PLANE 2, LENGTH PLANE 3, etc. ===
+                string baseName = "LENGTH PLANE";
+                int nextIndex = 2;
+                bool baseExists = false;
+
+                Feature feat = doc.FirstFeature();
+                HashSet<string> existingNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                while (feat != null)
+                {
+                    string name = feat.Name;
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        existingNames.Add(name);
+
+                        // Detect "LENGTH PLANE" and "LENGTH PLANE n"
+                        if (name.Equals(baseName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            baseExists = true;
+                        }
+                        else if (name.StartsWith(baseName + " ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string numPart = name.Substring(baseName.Length).Trim();
+                            if (int.TryParse(numPart, out int num))
+                                nextIndex = Math.Max(nextIndex, num + 1);
+                        }
+                    }
+                    feat = feat.GetNextFeature();
+                }
+
+                string newName;
+                if (!baseExists)
+                    newName = baseName;
+                else
+                    newName = $"{baseName} {nextIndex}";
+
+                newPlane.Name = newName;
+
+                // Clear selection for clean exit
+                doc.ClearSelection2(true);
+
+                // Notify user
+                iSwApp.SendMsgToUser2(
+                    $"Created new length plane: {newName}\nOffset {input.Trim()} from Right Plane.",
+                    (int)swMessageBoxIcon_e.swMbInformation,
+                    (int)swMessageBoxBtn_e.swMbOk
+                );
+            }
+            catch (System.Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Error creating assembly feature: " + ex.Message);
+            }
+        }
+
+        public int EnableOnlyInAssembly()
+        {
+            if (iSwApp == null) return 0;
+            var doc = iSwApp.ActiveDoc as ModelDoc2;
+            if (doc == null) return 0;
+            return (doc.GetType() == (int)swDocumentTypes_e.swDocASSEMBLY) ? 1 : 0;
+        }
 
         public void ShowPMP()
         {
@@ -412,6 +577,7 @@ namespace ClineTools
             flyGroup.AddCommandItem(System.DateTime.Now.ToLongTimeString(), "test", 0, "FlyoutCommandItem1", "FlyoutEnableCommandItem1");
 
         }
+
         public int FlyoutEnable()
         {
             return 1;

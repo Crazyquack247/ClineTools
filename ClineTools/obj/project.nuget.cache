@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "3HQBJt+Vuuc=",
+  "dgSpecHash": "vvFi8MZvzgg=",
   "success": true,
-  "projectFilePath": "C:\\Users\\jbarnes\\OneDrive - AFC Industries\\Documents\\GitHub\\ClineTools\\ClineTools\\ClineTools.csproj",
+  "projectFilePath": "C:\\Users\\jbarnes\\source\\repos\\ClineTools\\ClineTools.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\jbarnes\\.nuget\\packages\\microsoft-windowsapicodepack-core\\1.1.5\\microsoft-windowsapicodepack-core.1.1.5.nupkg.sha512",
     "C:\\Users\\jbarnes\\.nuget\\packages\\microsoft-windowsapicodepack-shell\\1.1.5\\microsoft-windowsapicodepack-shell.1.1.5.nupkg.sha512",
