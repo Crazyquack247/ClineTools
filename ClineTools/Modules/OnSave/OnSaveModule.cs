@@ -165,7 +165,7 @@ namespace ClineTools.Modules
 
                 if (doc == null)
                 {
-                    MessageBox.Show("Unable to access document for metadata writing.", "Error");
+                    //MessageBox.Show("Unable to access document for metadata writing.", "Error");
                     return;
                 }
 
@@ -174,7 +174,7 @@ namespace ClineTools.Modules
                 CustomPropertyManager propMgr = doc.Extension.CustomPropertyManager[""];
 
                 // Add or update custom properties
-
+                
                 if (!string.IsNullOrWhiteSpace(description))
                     propMgr.Add3("Description", (int)swCustomInfoType_e.swCustomInfoText, description, (int)swCustomPropertyAddOption_e.swCustomPropertyReplaceValue);
 
@@ -184,7 +184,8 @@ namespace ClineTools.Modules
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to write SolidWorks metadata: " + ex.Message);
+                //MessageBox.Show("Failed to write SolidWorks metadata: " + ex.Message);
+                ex.ToString();
             }
         }
     }

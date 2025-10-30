@@ -152,6 +152,7 @@ namespace ClineTools
             _moduleManager.LoadModules();
 
             //Setup callbacks
+
             iSwApp.SetAddinCallbackInfo(0, this, addinID);
 
             #region Setup the Command Manager
@@ -184,7 +185,9 @@ namespace ClineTools
             iCmdMgr = null;
             System.Runtime.InteropServices.Marshal.ReleaseComObject(iSwApp);
             iSwApp = null;
+
             //The addin _must_ call GC.Collect() here in order to retrieve all managed code pointers 
+
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
@@ -217,7 +220,9 @@ namespace ClineTools
             bool ignorePrevious = false;
 
             object registryIDs;
+
             //get the ID information stored in the registry
+
             bool getDataResult = iCmdMgr.GetGroupDataFromRegistry(mainCmdGroupID, out registryIDs);
 
             int[] knownIDs = new int[2] { mainItemID1, mainItemID2 };
@@ -236,9 +241,11 @@ namespace ClineTools
             cmdGroup.LargeMainIcon = iBmp.CreateFileFromResourceBitmap("ClineTools.MainIconLarge.bmp", thisAssembly);
             cmdGroup.SmallMainIcon = iBmp.CreateFileFromResourceBitmap("ClineTools.MainIconSmall.bmp", thisAssembly);
 
+            // -------------------------------{ Command Manager Button Implementation }-------------------------------
+
             int menuToolbarOption = (int)(swCommandItemType_e.swMenuItem | swCommandItemType_e.swToolbarItem);
-            cmdIndex0 = cmdGroup.AddCommandItem2("Custom Assembly Feature", -1, "Create an offset reference plane in the active assembly",
-                "Asm Feature", 0, "CreateAssemblyPlaneFeature", "EnableOnlyInAssembly", mainItemID1, menuToolbarOption);
+            cmdIndex0 = cmdGroup.AddCommandItem2("Create Length Plane", -1, "Create an offset reference plane in the active assembly",
+                "Create Length Plane", 0, "CreateLengthPlaneFeature", "EnableOnlyInAssembly", mainItemID1, menuToolbarOption);
             cmdIndex1 = cmdGroup.AddCommandItem2("Show PMP", -1, "Display sample property manager", "Show PMP", 2, "ShowPMP", "EnablePMP",
                 mainItemID2, menuToolbarOption);
 
@@ -248,7 +255,7 @@ namespace ClineTools
 
             bool bResult;
 
-
+            // ------------------------------------------------{ End }------------------------------------------------
 
             FlyoutGroup flyGroup = iCmdMgr.CreateFlyoutGroup(flyoutGroupID, "Dynamic Flyout", "Flyout Tooltip", "Flyout Hint",
               cmdGroup.SmallMainIcon, cmdGroup.LargeMainIcon, cmdGroup.SmallIconList, cmdGroup.LargeIconList, "FlyoutCallback", "FlyoutEnable");
@@ -272,6 +279,7 @@ namespace ClineTools
                 }
 
                 //if cmdTab is null, must be first load (possibly after reset), add the commands to the tabs
+
                 if (cmdTab == null)
                 {
                     cmdTab = iCmdMgr.AddCommandTab(type, Title);
@@ -364,36 +372,10 @@ namespace ClineTools
         #endregion
 
         #region UI Callbacks
-        public void CreateCube()
-        {
-            //make sure we have a part open
-            string partTemplate = iSwApp.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
-            if ((partTemplate != null) && (partTemplate != ""))
-            {
-                IModelDoc2 modDoc = (IModelDoc2)iSwApp.NewDocument(partTemplate, (int)swDwgPaperSizes_e.swDwgPaperA2size, 0.0, 0.0);
 
-                modDoc.InsertSketch2(true);
-                modDoc.SketchRectangle(0, 0, 0, .1, .1, .1, false);
-                //Extrude the sketch
-                IFeatureManager featMan = modDoc.FeatureManager;
-                featMan.FeatureExtrusion(true,
-                    false, false,
-                    (int)swEndConditions_e.swEndCondBlind, (int)swEndConditions_e.swEndCondBlind,
-                    0.1, 0.0,
-                    false, false,
-                    false, false,
-                    0.0, 0.0,
-                    false, false,
-                    false, false,
-                    true,
-                    false, false);
-            }
-            else
-            {
-                System.Windows.Forms.MessageBox.Show("There is no part template available. Please check your options and make sure there is a part template selected, or select a new part template.");
-            }
-        }
+        // -------------------------------{ Command Manager Button Implementation }-------------------------------
 
+        #region Offset Length Plane
         private static bool TryParseDistanceToMeters(string raw, out double meters)
         {
             meters = 0;
@@ -554,7 +536,9 @@ namespace ClineTools
             if (doc == null) return 0;
             return (doc.GetType() == (int)swDocumentTypes_e.swDocASSEMBLY) ? 1 : 0;
         }
+        #endregion
 
+        // ------------------------------------------------{ End }------------------------------------------------
         public void ShowPMP()
         {
             if (ppage != null)
@@ -598,7 +582,9 @@ namespace ClineTools
         public bool AttachEventHandlers()
         {
             AttachSwEvents();
+
             //Listen for events on all currently open docs
+
             AttachEventsToAllDocuments();
             return true;
         }
@@ -707,11 +693,13 @@ namespace ClineTools
             DetachSwEvents();
 
             //Close events on all currently open docs
+
             DocumentEventHandler docHandler;
             int numKeys = openDocs.Count;
             object[] keys = new Object[numKeys];
 
             //Remove all document event handlers
+
             openDocs.Keys.CopyTo(keys, 0);
             foreach (ModelDoc2 key in keys)
             {
@@ -724,6 +712,7 @@ namespace ClineTools
         #endregion
 
         #region Event Handlers
+
         //Events
         public int OnDocChange()
         {

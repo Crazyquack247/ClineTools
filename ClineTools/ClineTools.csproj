@@ -28,7 +28,7 @@
     </UpgradeBackupLocation>
     <StartProgram>C:\Program Files\SOLIDWORKS Corp 2025\SOLIDWORKS\\SldWorks.exe</StartProgram>
     <StartAction>Program</StartAction>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -79,6 +79,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
@@ -125,6 +128,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\UserPMPage.cs" />
+    <Compile Include="Modules\ToolWiz\ToolWizForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modules\ToolWiz\ToolWizForm.Designer.cs">
+      <DependentUpon>ToolWizForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ModManager\IModule.cs" />
     <Compile Include="ModManager\ModManager.cs" />
     <Compile Include="Modules\OnSave\OnSaveMenu.cs">
@@ -134,13 +143,26 @@
       <DependentUpon>OnSaveMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Modules\OnSave\OnSaveModule.cs" />
+    <Compile Include="Modules\ToolWiz\ToolWizModule.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Modules\ToolWiz\ToolWizPropRow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Modules\ToolWiz\ToolWizPropRow.Designer.cs">
+      <DependentUpon>ToolWizPropRow.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Modules\ToolWiz\ToolWizForm.resx">
+      <DependentUpon>ToolWizForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Modules\OnSave\OnSaveMenu.resx">
       <DependentUpon>OnSaveMenu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Modules\ToolWiz\ToolWizPropRow.resx">
+      <DependentUpon>ToolWizPropRow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -164,6 +186,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icons\CLINE LOGO.png" />
+    <None Include="Icons\DD ARROW DOWN.png" />
+    <None Include="Icons\DD ARROW UP.png" />
+    <None Include="Icons\DIAMETER.png" />
+    <None Include="Icons\H LINE.png" />
+    <None Include="Icons\LENGTH.png" />
+    <Content Include="Icons\LINE.png" />
     <Content Include="Icons\X_T ICON.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -171,35 +199,6 @@
     <PreBuildEvent>
     </PreBuildEvent>
     <PostBuildEvent>
-IF "$(TargetFrameworkVersion)"=="v4.0" GOTO NET40
-IF "$(TargetFrameworkVersion)"=="v3.5" GOTO NET20
-IF "$(TargetFrameworkVersion)"=="v3.0" GOTO NET20
-IF "$(TargetFrameworkVersion)"=="v2.0" GOTO NET20
-GOTO END
-
-:NET40
-set FMWK="v4.0.30319"
-GOTO REG
-
-:NET20
-set FMWK="v2.0.50727"
-GOTO REG
-
-:REG
-IF "$(PlatformName)" == "AnyCPU" GOTO ANYCPU
-IF "$(PlatformName)" == "x64" GOTO X64
-GOTO END
-
-:ANYCPU
-IF EXIST "%Windir%\Microsoft.NET\Framework64\%FMWK%\regasm.exe" "%Windir%\Microsoft.NET\Framework64\%FMWK%\regasm" /codebase "$(TargetPath)"
-GOTO END
-
-:X64
-IF EXIST "%Windir%\Microsoft.NET\Framework64\%FMWK%\regasm.exe" "%Windir%\Microsoft.NET\Framework64\%FMWK%\regasm" /codebase "$(TargetPath)"
-GOTO END
-
-:END
-    
     </PostBuildEvent>
   </PropertyGroup>
 </Project>

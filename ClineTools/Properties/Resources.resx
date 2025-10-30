@@ -121,4 +121,25 @@
   <data name="CLINE LOGO" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Icons\CLINE LOGO.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="DD_ARROW_DOWN" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\DD ARROW DOWN.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DD_ARROW_UP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\DD ARROW UP.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DIAMETER" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\DIAMETER.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="H_LINE" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\H LINE.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LENGTH" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\LENGTH.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LINE" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\LINE.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="X_T_ICON" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Icons\X_T ICON.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
