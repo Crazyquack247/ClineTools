@@ -7,10 +7,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace ClineTools
 {
@@ -244,10 +246,38 @@ namespace ClineTools
             // -------------------------------{ Command Manager Button Implementation }-------------------------------
 
             int menuToolbarOption = (int)(swCommandItemType_e.swMenuItem | swCommandItemType_e.swToolbarItem);
+
             cmdIndex0 = cmdGroup.AddCommandItem2("Create Length Plane", -1, "Create an offset reference plane in the active assembly",
                 "Create Length Plane", 0, "CreateLengthPlaneFeature", "EnableOnlyInAssembly", mainItemID1, menuToolbarOption);
+
             cmdIndex1 = cmdGroup.AddCommandItem2("Show PMP", -1, "Display sample property manager", "Show PMP", 2, "ShowPMP", "EnablePMP",
                 mainItemID2, menuToolbarOption);
+
+            int stackerButtonId = cmdGroup.AddCommandItem2
+                (
+                    "Stacker",                      // menu text
+                    -1,                             // position
+                    "Open the Stacker task pane",   // tooltip
+                    "Stacker",                      // toolbar text
+                    2,                              // image list index (adjust if needed)
+                    "Cmd_ShowStacker",              // callback in this class
+                    "EnableOnlyInAssembly",         // enable-fn (you likely already have this)
+                    901,                            // command ID (unique in group)
+                    menuToolbarOption               // flags
+                );
+
+            int assignSinButtonId = cmdGroup.AddCommandItem2
+                (
+                    "Assign SIN",
+                    -1,
+                    "Assign a Stacker Index to the ACTIVE CONFIGURATION (parts only)",
+                    "Assign SIN",
+                    3,
+                    "Cmd_Stacker_AssignSinActive", // new callback below
+                    "EnableOnlyInPart",            // <-- enables only in parts
+                    902,
+                    menuToolbarOption
+                );
 
             cmdGroup.HasToolbar = true;
             cmdGroup.HasMenu = true;
@@ -303,8 +333,6 @@ namespace ClineTools
 
                     bResult = cmdBox.AddCommands(cmdIDs, TextType);
 
-
-
                     CommandTabBox cmdBox1 = cmdTab.AddCommandTabBox();
                     cmdIDs = new int[1];
                     TextType = new int[1];
@@ -317,10 +345,8 @@ namespace ClineTools
                     cmdTab.AddSeparator(cmdBox1, cmdIDs[0]);
 
                 }
-
             }
             thisAssembly = null;
-
         }
 
         public void RemoveCommandMgr()
@@ -535,6 +561,20 @@ namespace ClineTools
             var doc = iSwApp.ActiveDoc as ModelDoc2;
             if (doc == null) return 0;
             return (doc.GetType() == (int)swDocumentTypes_e.swDocASSEMBLY) ? 1 : 0;
+        }
+        #endregion
+
+        #region Stacker
+        public void Cmd_ShowStacker()
+        {
+            var m = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
+            m?.TogglePane();
+        }
+
+        public void Cmd_AssignSin()
+        {
+            var m = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
+            m?.AssignSinToActivePart();
         }
         #endregion
 

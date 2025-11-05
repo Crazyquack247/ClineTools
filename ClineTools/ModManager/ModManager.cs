@@ -13,14 +13,17 @@ namespace ClineTools
         {
             this.swApp = swApp;
         }
+
         public void LoadModules()
         {
-            _modules.AddRange(new IModule[]
-            {
-                // List modules here
+            _modules.Clear();
 
-                new Modules.OnSaveModule(),
-            });
+            // -------------------------------{ Loaded Modules }-------------------------------
+                
+            _modules.Add(new ClineTools.Modules.OnSaveModule());
+            _modules.Add(new ClineTools.Modules.Stacker.StackerModule());
+
+            // -------------------------------------{ End }------------------------------------
 
             foreach (var module in _modules)
                 module.Initialize(swApp);

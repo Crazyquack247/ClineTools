@@ -29,6 +29,7 @@
     <StartProgram>C:\Program Files\SOLIDWORKS Corp 2025\SOLIDWORKS\\SldWorks.exe</StartProgram>
     <StartAction>Program</StartAction>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>8.0</LangVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -128,12 +129,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\UserPMPage.cs" />
-    <Compile Include="Modules\ToolWiz\ToolWizForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Modules\ToolWiz\ToolWizForm.Designer.cs">
-      <DependentUpon>ToolWizForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="ModManager\IModule.cs" />
     <Compile Include="ModManager\ModManager.cs" />
     <Compile Include="Modules\OnSave\OnSaveMenu.cs">
@@ -143,26 +138,34 @@
       <DependentUpon>OnSaveMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Modules\OnSave\OnSaveModule.cs" />
-    <Compile Include="Modules\ToolWiz\ToolWizModule.cs" />
+    <Compile Include="Modules\Stacker\Decoders\StackerDecoders.cs" />
+    <Compile Include="Modules\Stacker\Sin\ISinDecoder.cs" />
+    <Compile Include="Modules\Stacker\Sin\SinFormats.cs" />
+    <Compile Include="Modules\Stacker\Sin\SinRegistry.cs" />
+    <Compile Include="Modules\Stacker\StackerModule.cs" />
+    <Compile Include="Modules\Stacker\Storage\AttributeStore.cs" />
+    <Compile Include="Modules\Stacker\UI\AddSinDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modules\Stacker\UI\AddSinDialog.Designer.cs">
+      <DependentUpon>AddSinDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Stacker\UI\AssignSinPreviewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modules\Stacker\UI\StackerPaneControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Modules\ToolWiz\ToolWizPropRow.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Modules\ToolWiz\ToolWizPropRow.Designer.cs">
-      <DependentUpon>ToolWizPropRow.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Modules\ToolWiz\ToolWizForm.resx">
-      <DependentUpon>ToolWizForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Modules\OnSave\OnSaveMenu.resx">
       <DependentUpon>OnSaveMenu.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Modules\ToolWiz\ToolWizPropRow.resx">
-      <DependentUpon>ToolWizPropRow.cs</DependentUpon>
+    <EmbeddedResource Include="Modules\Stacker\UI\AddSinDialog.resx">
+      <DependentUpon>AddSinDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -180,6 +183,9 @@
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
       <Version>1.1.5</Version>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.4</Version>
+    </PackageReference>
     <PackageReference Include="WindowsAPICodePack-Core">
       <Version>1.1.2</Version>
     </PackageReference>
@@ -194,6 +200,7 @@
     <Content Include="Icons\LINE.png" />
     <Content Include="Icons\X_T ICON.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

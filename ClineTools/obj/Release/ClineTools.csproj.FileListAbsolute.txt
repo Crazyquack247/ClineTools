@@ -10,6 +10,5 @@ C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.csproj.GenerateR
 C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.csproj.CoreCompileInputs.cache
 C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.csproj.Up2Date
 C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.dll
-C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.Tool_Wizard_Form.resources
-C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.ToolWizForm.resources
-C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.ToolWizPropRow.resources
+C:\Users\jbarnes\source\repos\ClineTools\bin\Release\Newtonsoft.Json.dll
+C:\Users\jbarnes\source\repos\ClineTools\obj\Release\ClineTools.Modules.Stacker.UI.AddSinDialog.resources

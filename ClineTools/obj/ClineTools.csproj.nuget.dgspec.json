@@ -52,6 +52,10 @@
               "target": "Package",
               "version": "[1.1.5, )"
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.4, )"
+            },
             "WindowsAPICodePack-Core": {
               "target": "Package",
               "version": "[1.1.2, )"

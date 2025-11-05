@@ -8,13 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ClineTools
+namespace ClineTools.Modules.Stacker.UI
 {
-    public partial class ToolWizPropRow : UserControl
+    public partial class AddSinDialog : Form
     {
-        public ToolWizPropRow()
+        public AddSinDialog()
         {
             InitializeComponent();
         }
+
+        public string EnteredSin => txtSin.Text;
     }
 }
