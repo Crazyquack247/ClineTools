@@ -1,8 +1,7 @@
-﻿// Modules/Stacker/StackerModule.cs
-using ClineTools.Modules.Stacker.Sin;
+﻿using ClineTools.Modules.Stacker.Sin;
 using ClineTools.Modules.Stacker.Storage;
 using ClineTools.Modules.Stacker.UI;
-using Newtonsoft.Json; // Make sure Newtonsoft.Json is referenced
+using Newtonsoft.Json;
 using SolidWorks.Interop.sldworks;
 using SolidWorks.Interop.swconst;
 using System;

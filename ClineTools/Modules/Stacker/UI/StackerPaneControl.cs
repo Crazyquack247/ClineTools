@@ -1,5 +1,4 @@
-﻿// Modules/Stacker/UI/StackerPaneControl.cs
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace ClineTools.Modules.Stacker.UI
 {

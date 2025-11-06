@@ -1,5 +1,4 @@
-﻿// Modules/Stacker/Decoders/StackerDecoders.cs
-using System;
+﻿using System;
 using System.Globalization;
 using ClineTools.Modules.Stacker.Sin;
 

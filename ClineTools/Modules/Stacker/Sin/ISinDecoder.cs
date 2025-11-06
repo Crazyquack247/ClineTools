@@ -1,5 +1,4 @@
-﻿// Modules/Stacker/Sin/ISinDecoder.cs
-namespace ClineTools.Modules.Stacker.Sin
+﻿namespace ClineTools.Modules.Stacker.Sin
 {
     public interface ISinDecoder
     {
