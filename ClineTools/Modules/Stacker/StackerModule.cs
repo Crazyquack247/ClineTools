@@ -1,5 +1,4 @@
 ﻿// Modules/Stacker/StackerModule.cs
-using ClineTools.Modules.Stacker.Decoders;
 using ClineTools.Modules.Stacker.Sin;
 using ClineTools.Modules.Stacker.Storage;
 using ClineTools.Modules.Stacker.UI;
@@ -8,7 +7,6 @@ using SolidWorks.Interop.sldworks;
 using SolidWorks.Interop.swconst;
 using System;
 using System.Windows.Forms;
-using System.Xml;
 
 namespace ClineTools.Modules.Stacker
 {

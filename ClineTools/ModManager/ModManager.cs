@@ -1,6 +1,5 @@
 ﻿using SolidWorks.Interop.sldworks;
 using System.Collections.Generic;
-using System.Windows;
 
 namespace ClineTools
 {

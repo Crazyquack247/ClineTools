@@ -63,6 +63,7 @@
             this.btnAssign.TabIndex = 2;
             this.btnAssign.Text = "Assign SIN";
             this.btnAssign.UseVisualStyleBackColor = true;
+            this.btnAssign.DialogResult = System.Windows.Forms.DialogResult.OK;
             // 
             // btnCancel
             // 

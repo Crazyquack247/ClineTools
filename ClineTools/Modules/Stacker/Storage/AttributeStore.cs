@@ -1,5 +1,4 @@
-﻿using System;
-using SolidWorks.Interop.sldworks;
+﻿using SolidWorks.Interop.sldworks;
 using SolidWorks.Interop.swconst;
 
 namespace ClineTools.Modules.Stacker.Storage

@@ -1,7 +1,6 @@
 ﻿// Modules/Stacker/Decoders/StackerDecoders.cs
 using System;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using ClineTools.Modules.Stacker.Sin;
 
 namespace ClineTools.Modules.Stacker.Decoders
@@ -44,9 +43,9 @@ namespace ClineTools.Modules.Stacker.Decoders
             throw new ArgumentException("No decoder recognized this SIN.");
         }
 
-        // ---------------------------
+        // ---------------------------------------------------
         // #region INSERT (industry)
-        // ---------------------------
+        // ---------------------------------------------------
 
         #region INSERT
 
@@ -148,9 +147,9 @@ namespace ClineTools.Modules.Stacker.Decoders
 
         #endregion
 
-        // ---------------------------
+        // ---------------------------------------------------
         // #region INSERT SCREW (IS-tt-EEE(-md)?)
-        // ---------------------------
+        // ---------------------------------------------------
 
         #region INSERT_SCREW
 
@@ -222,9 +221,9 @@ namespace ClineTools.Modules.Stacker.Decoders
 
         #endregion
 
-        // ---------------------------
+        // ---------------------------------------------------
         // #region CLAMP (CL-ix)
-        // ---------------------------
+        // ---------------------------------------------------
 
         #region CLAMP
 
@@ -248,9 +247,9 @@ namespace ClineTools.Modules.Stacker.Decoders
 
         #endregion
 
-        // ---------------------------
+        // ---------------------------------------------------
         // #region LOCK PIN (LP-ix-len)
-        // ---------------------------
+        // ---------------------------------------------------
 
         #region LOCK_PIN
 
@@ -277,9 +276,9 @@ namespace ClineTools.Modules.Stacker.Decoders
 
         #endregion
 
-        // ---------------------------
+        // ---------------------------------------------------
         // #region SHIM (SH-ix-thk)
-        // ---------------------------
+        // ---------------------------------------------------
 
         #region SHIM
 

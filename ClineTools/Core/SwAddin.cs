@@ -6,13 +6,10 @@ using SolidWorksTools.File;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 namespace ClineTools
 {
@@ -25,6 +22,7 @@ namespace ClineTools
     public class SwAddin : ISwAddin
     {
         #region Local Variables
+
         ISldWorks iSwApp = null;
         ICommandManager iCmdMgr = null;
         int addinID = 0;
@@ -207,13 +205,16 @@ namespace ClineTools
             if (iBmp == null)
                 iBmp = new BitmapHandler();
             Assembly thisAssembly;
-            int cmdIndex0, cmdIndex1;
+            int cmdIndex0, cmdIndex1, stackerButtonId, assignSinButtonId;
             string Title = "Cline Tools", ToolTip = "Cline Tools";
 
 
-            int[] docTypes = new int[]{(int)swDocumentTypes_e.swDocASSEMBLY,
-                                       (int)swDocumentTypes_e.swDocDRAWING,
-                                       (int)swDocumentTypes_e.swDocPART};
+            int[] docTypes = new int[]
+            {
+                (int)swDocumentTypes_e.swDocASSEMBLY,
+                (int)swDocumentTypes_e.swDocDRAWING,
+                (int)swDocumentTypes_e.swDocPART
+            };
 
             thisAssembly = System.Reflection.Assembly.GetAssembly(this.GetType());
 
@@ -253,7 +254,7 @@ namespace ClineTools
             cmdIndex1 = cmdGroup.AddCommandItem2("Show PMP", -1, "Display sample property manager", "Show PMP", 2, "ShowPMP", "EnablePMP",
                 mainItemID2, menuToolbarOption);
 
-            int stackerButtonId = cmdGroup.AddCommandItem2
+            stackerButtonId = cmdGroup.AddCommandItem2
                 (
                     "Stacker",                      // menu text
                     -1,                             // position
@@ -266,15 +267,15 @@ namespace ClineTools
                     menuToolbarOption               // flags
                 );
 
-            int assignSinButtonId = cmdGroup.AddCommandItem2
+            assignSinButtonId = cmdGroup.AddCommandItem2
                 (
                     "Assign SIN",
                     -1,
                     "Assign a Stacker Index to the ACTIVE CONFIGURATION (parts only)",
                     "Assign SIN",
                     3,
-                    "Cmd_Stacker_AssignSinActive", // new callback below
-                    "EnableOnlyInPart",            // <-- enables only in parts
+                    nameof(Cmd_AssignSin),
+                    nameof(EnableOnlyInPart),
                     902,
                     menuToolbarOption
                 );
@@ -567,14 +568,38 @@ namespace ClineTools
         #region Stacker
         public void Cmd_ShowStacker()
         {
-            var m = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
-            m?.TogglePane();
+            var module = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
+            module?.TogglePane();
         }
 
         public void Cmd_AssignSin()
         {
-            var m = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
-            m?.AssignSinToActivePart();
+            System.Windows.Forms.MessageBox.Show("Cmd_AssignSin() called");
+            try
+            {
+                var module = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
+
+                if (module == null) // <-- flip this
+                {
+                    System.Windows.Forms.MessageBox.Show("StackerModule not found (ModuleManager).");
+                    return;
+                }
+
+                module.AssignSinToActivePart(); // call it directly
+            }
+            catch (System.Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Cmd_AssignSin exception:\r\n" + ex, "Stacker");
+            }
+        }
+
+
+        public int EnableOnlyInPart()
+        {
+            if (iSwApp == null) return 0;
+            var doc = iSwApp.ActiveDoc as ModelDoc2;
+            if (doc == null) return 0;
+            return (doc.GetType() == (int)swDocumentTypes_e.swDocPART) ? 1 : 0;
         }
         #endregion
 
