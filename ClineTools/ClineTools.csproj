@@ -11,8 +11,7 @@
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
     <AssemblyName>ClineTools</AssemblyName>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>ClineToolsAddin.pfx</AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
@@ -28,7 +27,7 @@
     </UpgradeBackupLocation>
     <StartProgram>C:\Program Files\SOLIDWORKS Corp 2025\SOLIDWORKS\\SldWorks.exe</StartProgram>
     <StartAction>Program</StartAction>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <LangVersion>8.0</LangVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -79,9 +78,10 @@
     <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -96,6 +96,10 @@
     </Reference>
     <Reference Include="SolidWorks.Interop.swconst">
       <HintPath>..\..\..\..\..\Program Files\SOLIDWORKS Corp 2025\SOLIDWORKS\\SolidWorks.Interop.swconst.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="SolidWorks.Interop.swdocumentmgr">
+      <HintPath>..\..\..\..\..\Program Files\SOLIDWORKS Corp 2025\SOLIDWORKS\api\redist\SolidWorks.Interop.swdocumentmgr.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="SolidWorks.Interop.swpublished">
@@ -123,6 +127,7 @@
     <Compile Include="Core\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DebugTrace.cs" />
     <Compile Include="Core\EventHandling.cs" />
     <Compile Include="Core\PMPHandler.cs" />
     <Compile Include="Core\SwAddin.cs">
@@ -138,24 +143,35 @@
       <DependentUpon>OnSaveMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Modules\OnSave\OnSaveModule.cs" />
-    <Compile Include="Modules\Stacker\Decoders\StackerDecoders.cs" />
-    <Compile Include="Modules\Stacker\Sin\ISinDecoder.cs" />
-    <Compile Include="Modules\Stacker\Sin\SinFormats.cs" />
-    <Compile Include="Modules\Stacker\Sin\SinRegistry.cs" />
-    <Compile Include="Modules\Stacker\StackerModule.cs" />
-    <Compile Include="Modules\Stacker\Storage\AttributeStore.cs" />
-    <Compile Include="Modules\Stacker\UI\AddSinDialog.cs">
+    <Compile Include="Modules\PointDetail\EnterDiameterForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Modules\Stacker\UI\AddSinDialog.Designer.cs">
-      <DependentUpon>AddSinDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Modules\Stacker\UI\AssignSinPreviewForm.cs">
+    <Compile Include="Modules\PointDetail\PointDetailAnchorProps.cs" />
+    <Compile Include="Modules\PointDetail\PointDetailBlockInserter.cs" />
+    <Compile Include="Modules\PointDetail\PointDetailCalculator.cs" />
+    <Compile Include="Modules\PointDetail\PointDetailPropertyWriter.cs" />
+    <Compile Include="Modules\PointDetail\PointDetailRequest.cs" />
+    <Compile Include="Modules\PointDetail\PointDetailWizard.cs" />
+    <Compile Include="Modules\PointDetail\SelectTypeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Modules\Stacker\UI\StackerPaneControl.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="Modules\Release\ReleaseConfig.cs" />
+    <Compile Include="Modules\Release\ReleaseForm.cs">
+      <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Modules\Release\ReleaseForm.Designer.cs">
+      <DependentUpon>ReleaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Release\ReleaseLoadingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modules\Release\ReleaseModule.cs" />
+    <Compile Include="Modules\WhereUsed\SwDmKeyStore.cs" />
+    <Compile Include="Modules\WhereUsed\SwDmService.cs" />
+    <Compile Include="Modules\WhereUsed\WhereUsedForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modules\WhereUsed\WhereUsedModule.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -164,8 +180,8 @@
     <EmbeddedResource Include="Modules\OnSave\OnSaveMenu.resx">
       <DependentUpon>OnSaveMenu.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Modules\Stacker\UI\AddSinDialog.resx">
-      <DependentUpon>AddSinDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Modules\Release\ReleaseForm.resx">
+      <DependentUpon>ReleaseForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -192,6 +208,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icons\CLINE LOGO.png" />
+    <None Include="ClineToolsAddin.pfx" />
     <None Include="Icons\DD ARROW DOWN.png" />
     <None Include="Icons\DD ARROW UP.png" />
     <None Include="Icons\DIAMETER.png" />
@@ -199,6 +216,26 @@
     <None Include="Icons\LENGTH.png" />
     <Content Include="Icons\LINE.png" />
     <Content Include="Icons\X_T ICON.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="SwDocumentMgr">
+      <Guid>{4F55C30F-4CFD-49E9-A1A2-00C161EF4395}</Guid>
+      <VersionMajor>33</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,6 @@
-﻿namespace ClineTools.Modules.OnSave
+﻿using System.Windows.Forms;
+
+namespace ClineTools.Modules.OnSave
 {
     partial class OnSaveMenu
     {
@@ -6,6 +8,16 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+
+        private System.Windows.Forms.Button btnBrowse;
+        private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label lblFolderPath;
+        private System.Windows.Forms.TextBox txtDescription;
+        private System.Windows.Forms.TextBox txtFilename;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox comboBox1;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -37,11 +49,12 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.btnReplace = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnBrowse
             // 
-            this.btnBrowse.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBrowse.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.btnBrowse.Location = new System.Drawing.Point(51, 207);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(84, 31);
@@ -52,22 +65,22 @@
             // 
             // btnSave
             // 
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(492, 346);
+            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.btnSave.Location = new System.Drawing.Point(483, 346);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(81, 31);
-            this.btnSave.TabIndex = 4;
+            this.btnSave.TabIndex = 5;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // btnCancel
             // 
-            this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCancel.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.btnCancel.Location = new System.Drawing.Point(579, 346);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(81, 31);
-            this.btnCancel.TabIndex = 5;
+            this.btnCancel.TabIndex = 6;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -78,35 +91,35 @@
             this.lblFolderPath.AutoEllipsis = true;
             this.lblFolderPath.BackColor = System.Drawing.SystemColors.Window;
             this.lblFolderPath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblFolderPath.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFolderPath.Location = new System.Drawing.Point(141, 211);
+            this.lblFolderPath.Font = new System.Drawing.Font("Segoe UI", 9.75F);
+            this.lblFolderPath.Location = new System.Drawing.Point(151, 211);
             this.lblFolderPath.Name = "lblFolderPath";
-            this.lblFolderPath.Size = new System.Drawing.Size(464, 23);
+            this.lblFolderPath.Size = new System.Drawing.Size(454, 23);
             this.lblFolderPath.TabIndex = 3;
             this.lblFolderPath.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtDescription
             // 
             this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtDescription.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtDescription.Location = new System.Drawing.Point(141, 164);
+            this.txtDescription.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtDescription.Location = new System.Drawing.Point(151, 164);
             this.txtDescription.Name = "txtDescription";
-            this.txtDescription.Size = new System.Drawing.Size(464, 25);
+            this.txtDescription.Size = new System.Drawing.Size(454, 25);
             this.txtDescription.TabIndex = 2;
             // 
             // txtFilename
             // 
             this.txtFilename.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtFilename.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtFilename.Location = new System.Drawing.Point(141, 122);
+            this.txtFilename.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtFilename.Location = new System.Drawing.Point(151, 122);
             this.txtFilename.Name = "txtFilename";
-            this.txtFilename.Size = new System.Drawing.Size(335, 25);
+            this.txtFilename.Size = new System.Drawing.Size(318, 25);
             this.txtFilename.TabIndex = 0;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.label2.Location = new System.Drawing.Point(72, 122);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(63, 19);
@@ -117,7 +130,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.label3.Location = new System.Drawing.Point(57, 166);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(78, 19);
@@ -130,14 +143,24 @@
             this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.comboBox1.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(483, 122);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(124, 25);
+            this.comboBox1.Size = new System.Drawing.Size(122, 25);
             this.comboBox1.TabIndex = 1;
             this.comboBox1.TabStop = false;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // btnReplace
+            // 
+            this.btnReplace.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnReplace.Location = new System.Drawing.Point(12, 346);
+            this.btnReplace.Name = "btnReplace";
+            this.btnReplace.Size = new System.Drawing.Size(84, 31);
+            this.btnReplace.TabIndex = 8;
+            this.btnReplace.Text = "Replace";
+            this.btnReplace.UseVisualStyleBackColor = true;
+            this.btnReplace.Click += new System.EventHandler(this.btnReplace_Click);
             // 
             // OnSaveMenu
             // 
@@ -146,6 +169,7 @@
             this.BackgroundImage = global::ClineTools.Properties.Resources.CLINE_LOGO;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.ClientSize = new System.Drawing.Size(672, 387);
+            this.Controls.Add(this.btnReplace);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -155,11 +179,12 @@
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnBrowse);
-            this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DoubleBuffered = true;
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F);
             this.Name = "OnSaveMenu";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "OnSaveForm";
+            this.Text = "OnSave";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -167,14 +192,6 @@
 
         #endregion
 
-        private System.Windows.Forms.Button btnBrowse;
-        private System.Windows.Forms.Button btnSave;
-        private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Label lblFolderPath;
-        private System.Windows.Forms.TextBox txtDescription;
-        private System.Windows.Forms.TextBox txtFilename;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private Button btnReplace;
     }
 }

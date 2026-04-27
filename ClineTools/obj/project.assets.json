@@ -1,7 +1,7 @@
 {
   "version": 3,
   "targets": {
-    ".NETFramework,Version=v4.8": {
+    ".NETFramework,Version=v4.7.2": {
       "Microsoft-WindowsAPICodePack-Core/1.1.5": {
         "type": "package",
         "frameworkAssemblies": [
@@ -13,12 +13,12 @@
           "System.Xml"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         }
@@ -43,12 +43,12 @@
           "WindowsFormsIntegration"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         }
@@ -76,7 +76,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.8/win": {
+    ".NETFramework,Version=v4.7.2/win": {
       "Microsoft-WindowsAPICodePack-Core/1.1.5": {
         "type": "package",
         "frameworkAssemblies": [
@@ -88,12 +88,12 @@
           "System.Xml"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         }
@@ -118,12 +118,12 @@
           "WindowsFormsIntegration"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         }
@@ -151,7 +151,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.8/win-arm64": {
+    ".NETFramework,Version=v4.7.2/win-arm64": {
       "Microsoft-WindowsAPICodePack-Core/1.1.5": {
         "type": "package",
         "frameworkAssemblies": [
@@ -163,12 +163,12 @@
           "System.Xml"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         }
@@ -193,12 +193,12 @@
           "WindowsFormsIntegration"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         }
@@ -226,7 +226,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.8/win-x64": {
+    ".NETFramework,Version=v4.7.2/win-x64": {
       "Microsoft-WindowsAPICodePack-Core/1.1.5": {
         "type": "package",
         "frameworkAssemblies": [
@@ -238,12 +238,12 @@
           "System.Xml"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         }
@@ -268,12 +268,12 @@
           "WindowsFormsIntegration"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         }
@@ -301,7 +301,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.8/win-x86": {
+    ".NETFramework,Version=v4.7.2/win-x86": {
       "Microsoft-WindowsAPICodePack-Core/1.1.5": {
         "type": "package",
         "frameworkAssemblies": [
@@ -313,12 +313,12 @@
           "System.Xml"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.dll": {
             "related": ".xml"
           }
         }
@@ -343,12 +343,12 @@
           "WindowsFormsIntegration"
         ],
         "compile": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net48/Microsoft.WindowsAPICodePack.Shell.dll": {
+          "lib/net472/Microsoft.WindowsAPICodePack.Shell.dll": {
             "related": ".xml"
           }
         }
@@ -477,7 +477,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    ".NETFramework,Version=v4.8": [
+    ".NETFramework,Version=v4.7.2": [
       "Microsoft-WindowsAPICodePack-Core >= 1.1.5",
       "Microsoft-WindowsAPICodePack-Shell >= 1.1.5",
       "Newtonsoft.Json >= 13.0.4",
@@ -508,14 +508,14 @@
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net48"
+        "net472"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net48": {
+        "net472": {
           "projectReferences": {}
         }
       },
@@ -526,7 +526,7 @@
       }
     },
     "frameworks": {
-      "net48": {
+      "net472": {
         "dependencies": {
           "Microsoft-WindowsAPICodePack-Core": {
             "target": "Package",

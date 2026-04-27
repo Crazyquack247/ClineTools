@@ -1,15 +1,16 @@
-﻿using SolidWorks.Interop.sldworks;
-using SolidWorks.Interop.swconst;
-using SolidWorks.Interop.swpublished;
-using SolidWorksTools;
-using SolidWorksTools.File;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using SolidWorks.Interop.sldworks;
+using SolidWorks.Interop.swconst;
+using SolidWorks.Interop.swpublished;
+using SolidWorksTools;
+using SolidWorksTools.File;
 
 namespace ClineTools
 {
@@ -17,48 +18,46 @@ namespace ClineTools
     [SwAddin(
         Description = "Cline Tool macro library",
         Title = "ClineTools",
-        LoadAtStartup = true
-        )]
+        LoadAtStartup = true)]
     public class SwAddin : ISwAddin
     {
         #region Local Variables
 
-        ISldWorks iSwApp = null;
-        ICommandManager iCmdMgr = null;
-        int addinID = 0;
-        BitmapHandler iBmp;
+        static SwAddin()
+        {
+            System.Windows.Forms.Application.EnableVisualStyles();
+            System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
+        }
+
+        private ISldWorks _swApp;
+        private ICommandManager _cmdMgr;
+        private int _addinId;
+        private BitmapHandler _bmpHandler;
         private ModManager _moduleManager;
+
+        // Global on/off switch for ClineTools functions
+        private bool _clineToolsEnabled = true;
+        private bool _modulesLoaded;
 
         public const int mainCmdGroupID = 5;
         public const int mainItemID1 = 0;
         public const int mainItemID2 = 1;
         public const int mainItemID3 = 2;
+        public const int mainItemID4 = 3;
+        public const int mainItemID5 = 4;
         public const int flyoutGroupID = 91;
 
-        #region Event Handler Variables
-        Hashtable openDocs = new Hashtable();
-        SolidWorks.Interop.sldworks.SldWorks SwEventPtr = null;
-        #endregion
+        // Event handler state
+        private Hashtable _openDocs = new Hashtable();
+        private SldWorks _swEventPtr;
 
-        #region Property Manager Variables
-        UserPMPage ppage = null;
-        #endregion
-
+        // Property Manager
+        private UserPMPage _ppage;
 
         // Public Properties
-        public ISldWorks SwApp
-        {
-            get { return iSwApp; }
-        }
-        public ICommandManager CmdMgr
-        {
-            get { return iCmdMgr; }
-        }
-
-        public Hashtable OpenDocs
-        {
-            get { return openDocs; }
-        }
+        public ISldWorks SwApp => _swApp;
+        public ICommandManager CmdMgr => _cmdMgr;
+        public Hashtable OpenDocs => _openDocs;
 
         #endregion
 
@@ -66,20 +65,17 @@ namespace ClineTools
         [ComRegisterFunctionAttribute]
         public static void RegisterFunction(Type t)
         {
-            #region Get Custom Attribute: SwAddinAttribute
-            SwAddinAttribute SWattr = null;
+            SwAddinAttribute swAttr = null;
             Type type = typeof(SwAddin);
 
             foreach (System.Attribute attr in type.GetCustomAttributes(false))
             {
                 if (attr is SwAddinAttribute)
                 {
-                    SWattr = attr as SwAddinAttribute;
+                    swAttr = attr as SwAddinAttribute;
                     break;
                 }
             }
-
-            #endregion
 
             try
             {
@@ -90,23 +86,21 @@ namespace ClineTools
                 Microsoft.Win32.RegistryKey addinkey = hklm.CreateSubKey(keyname);
                 addinkey.SetValue(null, 0);
 
-                addinkey.SetValue("Description", SWattr.Description);
-                addinkey.SetValue("Title", SWattr.Title);
+                addinkey.SetValue("Description", swAttr.Description);
+                addinkey.SetValue("Title", swAttr.Title);
 
                 keyname = "Software\\SolidWorks\\AddInsStartup\\{" + t.GUID.ToString() + "}";
                 addinkey = hkcu.CreateSubKey(keyname);
-                addinkey.SetValue(null, Convert.ToInt32(SWattr.LoadAtStartup), Microsoft.Win32.RegistryValueKind.DWord);
+                addinkey.SetValue(null, Convert.ToInt32(swAttr.LoadAtStartup), Microsoft.Win32.RegistryValueKind.DWord);
             }
-            catch (System.NullReferenceException nl)
+            catch (NullReferenceException nl)
             {
                 Console.WriteLine("There was a problem registering this dll: SWattr is null. \n\"" + nl.Message + "\"");
                 System.Windows.Forms.MessageBox.Show("There was a problem registering this dll: SWattr is null.\n\"" + nl.Message + "\"");
             }
-
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-
                 System.Windows.Forms.MessageBox.Show("There was a problem registering the function: \n\"" + e.Message + "\"");
             }
         }
@@ -125,76 +119,136 @@ namespace ClineTools
                 keyname = "Software\\SolidWorks\\AddInsStartup\\{" + t.GUID.ToString() + "}";
                 hkcu.DeleteSubKey(keyname);
             }
-            catch (System.NullReferenceException nl)
+            catch (NullReferenceException nl)
             {
                 Console.WriteLine("There was a problem unregistering this dll: " + nl.Message);
                 System.Windows.Forms.MessageBox.Show("There was a problem unregistering this dll: \n\"" + nl.Message + "\"");
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("There was a problem unregistering this dll: " + e.Message);
                 System.Windows.Forms.MessageBox.Show("There was a problem unregistering this dll: \n\"" + e.Message + "\"");
             }
         }
 
-        #endregion
-
-        #region ISwAddin Implementation
         public SwAddin()
         {
         }
 
-        public bool ConnectToSW(object ThisSW, int cookie)
+        #endregion
+
+        #region ISwAddin Implementation
+        public bool ConnectToSW(object thisSw, int cookie)
         {
-            iSwApp = (ISldWorks)ThisSW;
-            addinID = cookie;
-            _moduleManager = new ModManager(iSwApp);
-            _moduleManager.LoadModules();
+            DebugTrace.Log("ConnectToSW: ENTER");
 
-            //Setup callbacks
+            try
+            {
+                _swApp = (ISldWorks)thisSw;
+                _addinId = cookie;
 
-            iSwApp.SetAddinCallbackInfo(0, this, addinID);
+                DebugTrace.Log("ConnectToSW: _swApp + _addinId set");
 
-            #region Setup the Command Manager
-            iCmdMgr = iSwApp.GetCommandManager(cookie);
-            AddCommandMgr();
-            #endregion
+                // Module manager + modules
+                _moduleManager = new ModManager(_swApp);
+                DebugTrace.Log("ConnectToSW: ModManager created");
 
-            #region Setup the Event Handlers
-            SwEventPtr = (SolidWorks.Interop.sldworks.SldWorks)iSwApp;
-            openDocs = new Hashtable();
-            AttachEventHandlers();
-            #endregion
+                _moduleManager.LoadModules();
+                _modulesLoaded = true;
+                _clineToolsEnabled = true;
 
-            #region Setup Sample Property Manager
-            AddPMP();
-            #endregion
+                DebugTrace.Log("ConnectToSW: Modules loaded");
 
-            return true;
+                // Callback info must be set early
+                _swApp.SetAddinCallbackInfo(0, this, _addinId);
+                DebugTrace.Log("ConnectToSW: SetAddinCallbackInfo complete");
+
+                // Command manager + UI
+                _cmdMgr = _swApp.GetCommandManager(cookie);
+                DebugTrace.Log("ConnectToSW: GetCommandManager complete");
+
+                AddCommandMgr();
+                DebugTrace.Log("ConnectToSW: AddCommandMgr complete");
+
+                // Events
+                _swEventPtr = (SldWorks)_swApp;
+                _openDocs = new Hashtable();
+
+                DebugTrace.Log("ConnectToSW: Event ptr + openDocs set");
+
+                AttachEventHandlers();
+                DebugTrace.Log("ConnectToSW: AttachEventHandlers complete");
+
+                // PMP
+                AddPMP();
+                DebugTrace.Log("ConnectToSW: AddPMP complete");
+
+                DebugTrace.Log("ConnectToSW: SUCCESS");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    DebugTrace.DumpOnError(ex, "ConnectToSW FAILURE");
+                    DebugTrace.Log("ConnectToSW: FAIL (see DumpOnError entry)");
+                }
+                catch
+                {
+                    // Never throw from the catch
+                }
+
+                // IMPORTANT: show full exception, not just Message, because LoaderExceptions matter
+                System.Windows.Forms.MessageBox.Show(
+                    "ClineTools failed to load:\n\n" + ex,
+                    "ClineTools Add-in Error",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
+
+                return false;
+            }
         }
 
         public bool DisconnectFromSW()
         {
-            RemoveCommandMgr();
-            RemovePMP();
-            DetachEventHandlers();
+            try
+            {
+                RemoveCommandMgr();
+                RemovePMP();
+                DetachEventHandlers();
 
-            _moduleManager.UnloadModules();
+                if (_moduleManager != null)
+                {
+                    _moduleManager.UnloadModules();
+                    _moduleManager = null;
+                }
 
-            System.Runtime.InteropServices.Marshal.ReleaseComObject(iCmdMgr);
-            iCmdMgr = null;
-            System.Runtime.InteropServices.Marshal.ReleaseComObject(iSwApp);
-            iSwApp = null;
+                _modulesLoaded = false;
+                _clineToolsEnabled = false;
 
-            //The addin _must_ call GC.Collect() here in order to retrieve all managed code pointers 
+                if (_cmdMgr != null)
+                {
+                    Marshal.ReleaseComObject(_cmdMgr);
+                    _cmdMgr = null;
+                }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+                if (_swApp != null)
+                {
+                    Marshal.ReleaseComObject(_swApp);
+                    _swApp = null;
+                }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
 
-            return true;
+                return true;
+            }
+            catch
+            {
+                return true; // keep legacy behavior: SW expects disconnect to be resilient
+            }
         }
         #endregion
 
@@ -202,160 +256,162 @@ namespace ClineTools
         public void AddCommandMgr()
         {
             ICommandGroup cmdGroup;
-            if (iBmp == null)
-                iBmp = new BitmapHandler();
-            Assembly thisAssembly;
-            int cmdIndex0, cmdIndex1, stackerButtonId, assignSinButtonId;
-            string Title = "Cline Tools", ToolTip = "Cline Tools";
+            if (_bmpHandler == null)
+                _bmpHandler = new BitmapHandler();
 
+            int cmdIndexCreatePlane, cmdIndexToggle, cmdIndexPoint;
+            const string Title = "Cline Tools";
+            const string ToolTip = "Cline Tools";
 
-            int[] docTypes = new int[]
+            int[] docTypes =
             {
                 (int)swDocumentTypes_e.swDocASSEMBLY,
                 (int)swDocumentTypes_e.swDocDRAWING,
                 (int)swDocumentTypes_e.swDocPART
             };
 
-            thisAssembly = System.Reflection.Assembly.GetAssembly(this.GetType());
-
+            Assembly thisAssembly = Assembly.GetAssembly(GetType());
 
             int cmdGroupErr = 0;
-            bool ignorePrevious = false;
 
-            object registryIDs;
+            // Always rebuild the command group to avoid stale registry issues
+            bool ignorePrevious = true;
 
-            //get the ID information stored in the registry
+            cmdGroup = _cmdMgr.CreateCommandGroup2(
+                mainCmdGroupID, Title, ToolTip, "", -1, ignorePrevious, ref cmdGroupErr);
 
-            bool getDataResult = iCmdMgr.GetGroupDataFromRegistry(mainCmdGroupID, out registryIDs);
-
-            int[] knownIDs = new int[2] { mainItemID1, mainItemID2 };
-
-            if (getDataResult)
-            {
-                if (!CompareIDs((int[])registryIDs, knownIDs)) //if the IDs don't match, reset the commandGroup
-                {
-                    ignorePrevious = true;
-                }
-            }
-
-            cmdGroup = iCmdMgr.CreateCommandGroup2(mainCmdGroupID, Title, ToolTip, "", -1, ignorePrevious, ref cmdGroupErr);
-            cmdGroup.LargeIconList = iBmp.CreateFileFromResourceBitmap("ClineTools.ToolbarLarge.bmp", thisAssembly);
-            cmdGroup.SmallIconList = iBmp.CreateFileFromResourceBitmap("ClineTools.ToolbarSmall.bmp", thisAssembly);
-            cmdGroup.LargeMainIcon = iBmp.CreateFileFromResourceBitmap("ClineTools.MainIconLarge.bmp", thisAssembly);
-            cmdGroup.SmallMainIcon = iBmp.CreateFileFromResourceBitmap("ClineTools.MainIconSmall.bmp", thisAssembly);
-
-            // -------------------------------{ Command Manager Button Implementation }-------------------------------
+            cmdGroup.LargeIconList = _bmpHandler.CreateFileFromResourceBitmap("ClineTools.ToolbarLarge.bmp", thisAssembly);
+            cmdGroup.SmallIconList = _bmpHandler.CreateFileFromResourceBitmap("ClineTools.ToolbarSmall.bmp", thisAssembly);
+            cmdGroup.LargeMainIcon = _bmpHandler.CreateFileFromResourceBitmap("ClineTools.MainIconLarge.bmp", thisAssembly);
+            cmdGroup.SmallMainIcon = _bmpHandler.CreateFileFromResourceBitmap("ClineTools.MainIconSmall.bmp", thisAssembly);
 
             int menuToolbarOption = (int)(swCommandItemType_e.swMenuItem | swCommandItemType_e.swToolbarItem);
 
-            cmdIndex0 = cmdGroup.AddCommandItem2("Create Length Plane", -1, "Create an offset reference plane in the active assembly",
-                "Create Length Plane", 0, "CreateLengthPlaneFeature", "EnableOnlyInAssembly", mainItemID1, menuToolbarOption);
+            cmdIndexCreatePlane = cmdGroup.AddCommandItem2(
+                "Create Length Plane", -1,
+                "Create an offset reference plane in the active assembly",
+                "Create Length Plane", 0,
+                "CreateAssemblyPlaneFeature",
+                "EnableOnlyInAssembly",
+                mainItemID1, menuToolbarOption);
 
-            cmdIndex1 = cmdGroup.AddCommandItem2("Show PMP", -1, "Display sample property manager", "Show PMP", 2, "ShowPMP", "EnablePMP",
+            cmdIndexToggle = cmdGroup.AddCommandItem2(
+                "Toggle ClineTools", -1,
+                "Enable or disable ClineTools functions",
+                "Toggle ClineTools", 1,
+                "ToggleClineTools",
+                "EnableToggleClineTools",
                 mainItemID2, menuToolbarOption);
 
-            stackerButtonId = cmdGroup.AddCommandItem2
-                (
-                    "Stacker",                      // menu text
-                    -1,                             // position
-                    "Open the Stacker task pane",   // tooltip
-                    "Stacker",                      // toolbar text
-                    2,                              // image list index (adjust if needed)
-                    "Cmd_ShowStacker",              // callback in this class
-                    "EnableOnlyInAssembly",         // enable-fn (you likely already have this)
-                    901,                            // command ID (unique in group)
-                    menuToolbarOption               // flags
-                );
+            FlyoutGroup flyGroup = _cmdMgr.CreateFlyoutGroup(
+                flyoutGroupID,
+                "Release to MFG",
+                "Release to MFG",
+                "Release to MFG",
+                cmdGroup.SmallMainIcon,
+                cmdGroup.LargeMainIcon,
+                cmdGroup.SmallIconList,
+                cmdGroup.LargeIconList,
+                "ReleaseFlyoutCallback",
+                "ReleaseFlyoutEnable"
+            );
 
-            assignSinButtonId = cmdGroup.AddCommandItem2
-                (
-                    "Assign SIN",
-                    -1,
-                    "Assign a Stacker Index to the ACTIVE CONFIGURATION (parts only)",
-                    "Assign SIN",
-                    3,
-                    nameof(Cmd_AssignSin),
-                    nameof(EnableOnlyInPart),
-                    902,
-                    menuToolbarOption
-                );
+            cmdIndexPoint = cmdGroup.AddCommandItem2(
+                "Insert Point Detail", -1,
+                "Insert point detail into current drawing",
+                "Insert Point Detail", 2,
+                "InsertPointDetail",
+                "EnableInsertPointDetail",
+                mainItemID4, menuToolbarOption);
+
+            flyGroup.AddCommandItem(
+                "Release to MFG",
+                "Release current project to MFG",
+                0,
+                "ReleaseToMfg",
+                "EnableReleaseToMfg"
+            );
+
+            flyGroup.AddCommandItem(
+                "Release Legacy Project",
+                "Release a legacy project (not yet implemented)",
+                0,
+                "ReleaseLegacyProject",
+                "EnableReleaseLegacyProject"
+            );
+
+            int cmdIndexWhereUsed = cmdGroup.AddCommandItem2(
+                "Where Used",
+                -1,
+                "Find assemblies that reference the active part",
+                "Where Used",
+                3,                      // icon index (reuse an existing one for now)
+                "WhereUsed",
+                "EnableWhereUsed",
+                mainItemID5,
+                menuToolbarOption
+            );
 
             cmdGroup.HasToolbar = true;
             cmdGroup.HasMenu = true;
             cmdGroup.Activate();
 
-            bool bResult;
-
-            // ------------------------------------------------{ End }------------------------------------------------
-
-            FlyoutGroup flyGroup = iCmdMgr.CreateFlyoutGroup(flyoutGroupID, "Dynamic Flyout", "Flyout Tooltip", "Flyout Hint",
-              cmdGroup.SmallMainIcon, cmdGroup.LargeMainIcon, cmdGroup.SmallIconList, cmdGroup.LargeIconList, "FlyoutCallback", "FlyoutEnable");
-
-
-            flyGroup.AddCommandItem("FlyoutCommand 1", "test", 0, "FlyoutCommandItem1", "FlyoutEnableCommandItem1");
-
             flyGroup.FlyoutType = (int)swCommandFlyoutStyle_e.swCommandFlyoutStyle_Simple;
-
 
             foreach (int type in docTypes)
             {
-                CommandTab cmdTab;
+                CommandTab cmdTab = _cmdMgr.GetCommandTab(type, Title);
 
-                cmdTab = iCmdMgr.GetCommandTab(type, Title);
-
-                if (cmdTab != null & !getDataResult | ignorePrevious)//if tab exists, but we have ignored the registry info (or changed command group ID), re-create the tab.  Otherwise the ids won't matchup and the tab will be blank
+                if (cmdTab != null)
                 {
-                    bool res = iCmdMgr.RemoveCommandTab(cmdTab);
+                    _cmdMgr.RemoveCommandTab(cmdTab);
                     cmdTab = null;
                 }
 
-                //if cmdTab is null, must be first load (possibly after reset), add the commands to the tabs
-
+                cmdTab = _cmdMgr.AddCommandTab(type, Title);
                 if (cmdTab == null)
-                {
-                    cmdTab = iCmdMgr.AddCommandTab(type, Title);
+                    continue;
 
-                    CommandTabBox cmdBox = cmdTab.AddCommandTabBox();
+                CommandTabBox cmdBox = cmdTab.AddCommandTabBox();
 
-                    int[] cmdIDs = new int[3];
-                    int[] TextType = new int[3];
+                var cmdIDs = new List<int>();
+                var textTypes = new List<int>();
 
-                    cmdIDs[0] = cmdGroup.get_CommandID(cmdIndex0);
+                cmdIDs.Add(cmdGroup.get_CommandID(cmdIndexCreatePlane));
+                textTypes.Add((int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextBelow);
 
-                    TextType[0] = (int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextHorizontal;
+                cmdIDs.Add(flyGroup.CmdID);
+                textTypes.Add(
+                    (int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextBelow |
+                    (int)swCommandTabButtonFlyoutStyle_e.swCommandTabButton_ActionFlyout);
 
-                    cmdIDs[1] = cmdGroup.get_CommandID(cmdIndex1);
+                cmdIDs.Add(cmdGroup.get_CommandID(cmdIndexPoint));
+                textTypes.Add((int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextBelow);
 
-                    TextType[1] = (int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextHorizontal;
+                cmdIDs.Add(cmdGroup.get_CommandID(cmdIndexToggle));
+                textTypes.Add((int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextBelow);
 
-                    cmdIDs[2] = cmdGroup.ToolbarId;
+                cmdIDs.Add(cmdGroup.get_CommandID(cmdIndexWhereUsed));
+                textTypes.Add((int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextBelow);
 
-                    TextType[2] = (int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextHorizontal | (int)swCommandTabButtonFlyoutStyle_e.swCommandTabButton_ActionFlyout;
-
-                    bResult = cmdBox.AddCommands(cmdIDs, TextType);
-
-                    CommandTabBox cmdBox1 = cmdTab.AddCommandTabBox();
-                    cmdIDs = new int[1];
-                    TextType = new int[1];
-
-                    cmdIDs[0] = flyGroup.CmdID;
-                    TextType[0] = (int)swCommandTabButtonTextDisplay_e.swCommandTabButton_TextBelow | (int)swCommandTabButtonFlyoutStyle_e.swCommandTabButton_ActionFlyout;
-
-                    bResult = cmdBox1.AddCommands(cmdIDs, TextType);
-
-                    cmdTab.AddSeparator(cmdBox1, cmdIDs[0]);
-
-                }
+                cmdBox.AddCommands(cmdIDs.ToArray(), textTypes.ToArray());
             }
-            thisAssembly = null;
         }
 
         public void RemoveCommandMgr()
         {
-            iBmp.Dispose();
+            try
+            {
+                _bmpHandler?.Dispose();
+                _bmpHandler = null;
 
-            iCmdMgr.RemoveCommandGroup(mainCmdGroupID);
-            iCmdMgr.RemoveFlyoutGroup(flyoutGroupID);
+                _cmdMgr?.RemoveCommandGroup(mainCmdGroupID);
+                _cmdMgr?.RemoveFlyoutGroup(flyoutGroupID);
+            }
+            catch
+            {
+                // keep legacy behavior: do not throw during unload
+            }
         }
 
         public bool CompareIDs(int[] storedIDs, int[] addinIDs)
@@ -367,53 +423,45 @@ namespace ClineTools
             storedList.Sort();
 
             if (addinList.Count != storedList.Count)
-            {
                 return false;
-            }
-            else
+
+            for (int i = 0; i < addinList.Count; i++)
             {
-
-                for (int i = 0; i < addinList.Count; i++)
-                {
-                    if (addinList[i] != storedList[i])
-                    {
-                        return false;
-                    }
-                }
+                if (addinList[i] != storedList[i])
+                    return false;
             }
+
             return true;
         }
 
-        public Boolean AddPMP()
+        public bool AddPMP()
         {
-            ppage = new UserPMPage(this);
+            _ppage = new UserPMPage(this);
             return true;
         }
 
-        public Boolean RemovePMP()
+        public bool RemovePMP()
         {
-            ppage = null;
+            _ppage = null;
             return true;
         }
-
         #endregion
 
         #region UI Callbacks
 
-        // -------------------------------{ Command Manager Button Implementation }-------------------------------
+        #region Create Length Plane
 
-        #region Offset Length Plane
+        // Offset Length Plane
         private static bool TryParseDistanceToMeters(string raw, out double meters)
         {
             meters = 0;
             if (string.IsNullOrWhiteSpace(raw)) return false;
 
-            // Normalize: trim, collapse spaces
             string s = raw.Trim();
 
-            // Regex: capture number and optional unit (e.g., 3, 3.5, 3in, 4 mm, 25.4, etc.)
-            // Groups: 1=number, 2=unit (optional)
-            var m = Regex.Match(s, @"^\s*([+-]?\d+(?:\.\d+)?)\s*([a-z""']+)?\s*$",
+            var m = Regex.Match(
+                s,
+                @"^\s*([+-]?\d+(?:\.\d+)?)\s*([a-z""']+)?\s*$",
                 RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
             if (!m.Success) return false;
@@ -423,10 +471,6 @@ namespace ClineTools
 
             string unit = (m.Groups[2].Success ? m.Groups[2].Value : "").Trim().ToLowerInvariant();
 
-            // Supported units:
-            // inches: in, inch, inches, "   (double quote)
-            // millimeters: mm, millimeter, millimeters
-            // default (no unit): inches
             switch (unit)
             {
                 case "":
@@ -434,37 +478,41 @@ namespace ClineTools
                 case "inch":
                 case "inches":
                 case "\"":
-                    meters = value * 0.0254;        // inches -> meters
+                    meters = value * 0.0254;
                     return true;
 
                 case "mm":
                 case "millimeter":
                 case "millimeters":
-                    meters = value / 1000.0;        // mm -> meters
+                    meters = value / 1000.0;
                     return true;
 
-                // (Optional) quick extras if you ever want them:
-                // case "cm": meters = value / 100.0; return true;
-                // case "m": meters = value; return true;
-
                 default:
-                    return false; // unknown unit
+                    return false;
             }
         }
 
         public void CreateAssemblyPlaneFeature()
         {
+            if (!_clineToolsEnabled)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "ClineTools functions are currently disabled. Re-enable them using the \"Toggle ClineTools\" button in the ClineTools CommandManager tab to use this command.",
+                    "ClineTools – Disabled",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+                return;
+            }
+
             try
             {
-                // Ensure we are in an assembly
-                var doc = iSwApp.ActiveDoc as ModelDoc2;
+                var doc = _swApp.ActiveDoc as ModelDoc2;
                 if (doc == null || doc.GetType() != (int)swDocumentTypes_e.swDocASSEMBLY)
                 {
                     System.Windows.Forms.MessageBox.Show("Open an assembly to use this feature.");
                     return;
                 }
 
-                // Prompt for distance
                 string defaultText = "Offset Reference Plane";
                 string input = Microsoft.VisualBasic.Interaction.InputBox(
                     "Offset distance from Right Plane",
@@ -478,7 +526,6 @@ namespace ClineTools
                     return;
                 }
 
-                // Clear selection and select the Right Plane
                 doc.ClearSelection2(true);
                 bool sel = doc.Extension.SelectByID2("Right Plane", "PLANE", 0, 0, 0, false, 0, null, 0);
                 if (!sel)
@@ -489,7 +536,6 @@ namespace ClineTools
                     return;
                 }
 
-                // Create the new reference plane
                 var featMgr = doc.FeatureManager;
                 Feature newPlane = featMgr.InsertRefPlane(
                     (int)swRefPlaneReferenceConstraints_e.swRefPlaneReferenceConstraint_Distance,
@@ -502,7 +548,6 @@ namespace ClineTools
                     return;
                 }
 
-                // === Rename the plane to LENGTH PLANE, LENGTH PLANE 2, LENGTH PLANE 3, etc. ===
                 string baseName = "LENGTH PLANE";
                 int nextIndex = 2;
                 bool baseExists = false;
@@ -517,7 +562,6 @@ namespace ClineTools
                     {
                         existingNames.Add(name);
 
-                        // Detect "LENGTH PLANE" and "LENGTH PLANE n"
                         if (name.Equals(baseName, StringComparison.OrdinalIgnoreCase))
                         {
                             baseExists = true;
@@ -532,25 +576,18 @@ namespace ClineTools
                     feat = feat.GetNextFeature();
                 }
 
-                string newName;
-                if (!baseExists)
-                    newName = baseName;
-                else
-                    newName = $"{baseName} {nextIndex}";
-
+                string newName = !baseExists ? baseName : $"{baseName} {nextIndex}";
                 newPlane.Name = newName;
 
-                // Clear selection for clean exit
                 doc.ClearSelection2(true);
 
-                // Notify user
-                iSwApp.SendMsgToUser2(
+                _swApp.SendMsgToUser2(
                     $"Created new length plane: {newName}\nOffset {input.Trim()} from Right Plane.",
                     (int)swMessageBoxIcon_e.swMbInformation,
                     (int)swMessageBoxBtn_e.swMbOk
                 );
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 System.Windows.Forms.MessageBox.Show("Error creating assembly feature: " + ex.Message);
             }
@@ -558,98 +595,357 @@ namespace ClineTools
 
         public int EnableOnlyInAssembly()
         {
-            if (iSwApp == null) return 0;
-            var doc = iSwApp.ActiveDoc as ModelDoc2;
-            if (doc == null) return 0;
+            if (_swApp == null || !_clineToolsEnabled)
+                return 0;
+
+            var doc = _swApp.ActiveDoc as ModelDoc2;
+            if (doc == null)
+                return 0;
+
             return (doc.GetType() == (int)swDocumentTypes_e.swDocASSEMBLY) ? 1 : 0;
         }
+
         #endregion
 
-        #region Stacker
-        public void Cmd_ShowStacker()
+        #region Release to MFG
+
+        // Release flyout content is built dynamically when the user opens the dropdown
+        public void ReleaseFlyoutCallback()
         {
-            var module = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
-            module?.TogglePane();
+            if (_cmdMgr == null)
+                return;
+
+            FlyoutGroup flyGroup = _cmdMgr.GetFlyoutGroup(flyoutGroupID);
+            if (flyGroup == null)
+                return;
+
+            flyGroup.RemoveAllCommandItems();
+
+            flyGroup.AddCommandItem(
+                "Release Project",
+                "Release current project to manufacturing",
+                0,
+                "ReleaseToMfg",
+                "EnableReleaseToMfg");
+
+            flyGroup.AddCommandItem(
+                "Release Legacy Project",
+                "Release a legacy project (not yet implemented)",
+                1,
+                "ReleaseLegacyProject",
+                "EnableReleaseLegacyProject");
         }
 
-        public void Cmd_AssignSin()
+        public int ReleaseFlyoutEnable()
         {
-            System.Windows.Forms.MessageBox.Show("Cmd_AssignSin() called");
+            return (_swApp != null && _swApp.ActiveDoc != null && _clineToolsEnabled) ? 1 : 0;
+        }
+
+        public void ReleaseToMfg()
+        {
+            if (_swApp == null)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "The SolidWorks application object is not available.",
+                    "ClineTools – Release to MFG",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error
+                );
+                return;
+            }
+
+            if (!_clineToolsEnabled)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "ClineTools functions are currently disabled. Re-enable them using the \"Toggle ClineTools\" button in the ClineTools CommandManager tab before initiating a release to manufacturing.",
+                    "ClineTools – Release to MFG",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+                return;
+            }
+
+            var doc = _swApp.ActiveDoc as ModelDoc2;
+            if (doc == null)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "No active document was detected. Please open a model or drawing before initiating a release.",
+                    "ClineTools – Release to MFG",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            bool hasUnsavedChanges = doc.GetSaveFlag();
+            if (hasUnsavedChanges)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "The active document contains unsaved changes. Please save your file before releasing.",
+                    "ClineTools – Release to MFG",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning
+                );
+                return;
+            }
+
             try
             {
-                var module = _moduleManager.GetModule<ClineTools.Modules.Stacker.StackerModule>();
-
-                if (module == null) // <-- flip this
+                var module = _moduleManager.GetModule<ClineTools.Modules.Release.ReleaseModule>();
+                if (module == null)
                 {
-                    System.Windows.Forms.MessageBox.Show("StackerModule not found (ModuleManager).");
+                    System.Windows.Forms.MessageBox.Show(
+                        "The Release module is not available. Please contact your system administrator.",
+                        "ClineTools – Release to MFG",
+                        System.Windows.Forms.MessageBoxButtons.OK,
+                        System.Windows.Forms.MessageBoxIcon.Error
+                    );
                     return;
                 }
 
-                module.AssignSinToActivePart(); // call it directly
+                module.RunReleaseProcess();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Cmd_AssignSin exception:\r\n" + ex, "Stacker");
+                System.Windows.Forms.MessageBox.Show(
+                    "An unexpected error occurred while starting the release process:\n" + ex.Message,
+                    "ClineTools – Release to MFG",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error
+                );
             }
         }
 
-
-        public int EnableOnlyInPart()
+        public int EnableReleaseToMfg()
         {
-            if (iSwApp == null) return 0;
-            var doc = iSwApp.ActiveDoc as ModelDoc2;
-            if (doc == null) return 0;
-            return (doc.GetType() == (int)swDocumentTypes_e.swDocPART) ? 1 : 0;
+            return (_swApp != null && _swApp.ActiveDoc != null && _clineToolsEnabled) ? 1 : 0;
         }
+
+        public void ReleaseLegacyProject()
+        {
+            System.Windows.Forms.MessageBox.Show(
+                "Release Legacy Project has not been implemented.",
+                "ClineTools"
+            );
+        }
+
+        public int EnableReleaseLegacyProject()
+        {
+            return (_swApp != null && _swApp.ActiveDoc != null) ? 1 : 0;
+        }
+
         #endregion
 
-        // ------------------------------------------------{ End }------------------------------------------------
-        public void ShowPMP()
-        {
-            if (ppage != null)
-                ppage.Show();
-        }
+        #region Toggle ClineTools
 
-        public int EnablePMP()
+        // Global toggle button callback
+        public void ToggleClineTools()
         {
-            if (iSwApp.ActiveDoc != null)
-                return 1;
+            DebugTrace.DumpSnapshot("Toggle Cline Tools clicked");
+
+            if (_clineToolsEnabled)
+            {
+                if (_modulesLoaded && _moduleManager != null)
+                {
+                    _moduleManager.UnloadModules();
+                    _modulesLoaded = false;
+                }
+
+                _clineToolsEnabled = false;
+
+                System.Windows.Forms.MessageBox.Show(
+                    "ClineTools Add-In disabled.",
+                    "ClineTools – Global Toggle",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+            }
             else
+            {
+                if (!_modulesLoaded && _moduleManager != null && _swApp != null)
+                {
+                    _moduleManager.LoadModules();
+                    _modulesLoaded = true;
+                }
+
+                _clineToolsEnabled = true;
+
+                System.Windows.Forms.MessageBox.Show(
+                    "ClineTools Add-In enabled.",
+                    "ClineTools – Global Toggle",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+            }
+        }
+
+        public int EnableToggleClineTools()
+        {
+            return 1;
+        }
+
+        #endregion
+
+        #region Point Detail
+
+        public int EnableInsertPointDetail()
+        {
+            if (_swApp == null || !_clineToolsEnabled) return 0;
+
+            var model = _swApp.ActiveDoc as ModelDoc2;
+            if (model == null) return 0;
+
+            return (model.GetType() == (int)swDocumentTypes_e.swDocDRAWING) ? 1 : 0;
+        }
+
+        public void InsertPointDetail()
+        {
+            var model = _swApp?.ActiveDoc as ModelDoc2;
+            if (model == null || model.GetType() != (int)swDocumentTypes_e.swDocDRAWING)
+                return;
+
+            if (!Modules.PointDetail.PointDetailWizard.TryGetRequest(null, out var req))
+                return;
+
+            string gDrillBlockPath = @"F:\Engineer\_STANDARD LIBRARY\CLINE DESIGN LIBRARY\BLOCKS\G DRILL.SLDBLK";
+            string spiral2FluteBlockPath = @"F:\Engineer\_STANDARD LIBRARY\CLINE DESIGN LIBRARY\BLOCKS\2 FLUTE SPIRAL DRILL.SLDBLK";
+
+            Modules.PointDetail.PointDetailResult res;
+            string blockPath;
+            Dictionary<string, string> values;
+
+            if (req.Type.Equals("G-DRILL", StringComparison.OrdinalIgnoreCase))
+            {
+                res = Modules.PointDetail.PointDetailCalculator.Calculate(req.DiameterValue, req.Unit);
+                blockPath = gDrillBlockPath;
+
+                values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["PDIAMETER"] = res.PDIAMETER,
+                    ["PtMargin"] = res.PtMargin,
+                    ["PtAoC"] = res.PtAoC,
+                    ["PtHone"] = res.PtHone,
+                    ["PtClearanceDia"] = res.PtClearanceDia,
+                    ["PtConeRelief"] = res.PtConeRelief,
+                    ["PtGashRadius"] = res.PtGashRadius,
+                    ["PtChislePointThck"] = res.PtChislePointThck,
+                    ["PtFluteRadius"] = res.PtFluteRadius,
+                    ["PtBackTaper"] = res.PtBackTaper,
+                    ["PtSecondaryRAngle"] = res.PtSecondaryRAngle,
+                };
+            }
+            else if (req.Type.Equals("2 FLUTE SPIRAL DRILL", StringComparison.OrdinalIgnoreCase))
+            {
+                res = Modules.PointDetail.PointDetailCalculator.Calculate2FluteSpiral(req.DiameterValue, req.Unit);
+                blockPath = spiral2FluteBlockPath;
+
+                values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["PDIAMETER"] = res.PDIAMETER,
+                    ["PtGashRadius"] = res.PtGashRadius,
+                    ["PtAoC"] = res.PtAoC,
+                    ["PtKLand"] = res.PtKLand,
+                };
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    $"Unknown point detail type selected:\n{req.Type}",
+                    "Insert Point Detail",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+                return;
+            }
+
+            Modules.PointDetail.PointDetailPropertyWriter.WriteDrawingProps(model, req, res);
+
+            if (!Modules.PointDetail.PointDetailAnchorProps.TryGetAnchorInches(model, out double xIn, out double yIn))
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "Point Detail anchor is not configured.\n\n" +
+                    "Add these drawing custom properties to your drawing TEMPLATE (.drwdot):\n" +
+                    "  CT_POINTDETAIL_X_IN\n" +
+                    "  CT_POINTDETAIL_Y_IN\n\n" +
+                    "Values must be numeric inches (example: 0.310768).",
+                    "Insert Point Detail",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error
+                );
+                return;
+            }
+
+            var inst = Modules.PointDetail.PointDetailBlockInserter
+                .InsertAtStoredAnchor(_swApp, model, blockPath, xIn, yIn);
+
+            if (inst == null)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "Block insertion failed (instance is null).",
+                    "Insert Point Detail",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
+                return;
+            }
+
+            Modules.PointDetail.PointDetailBlockInserter.PopulateAttributes(inst, values);
+
+            model.ForceRebuild3(false);
+            model.GraphicsRedraw2();
+        }
+
+        #endregion
+
+        #region Where Used
+
+        public void WhereUsed()
+        {
+            if (!_clineToolsEnabled)
+                return;
+
+            try
+            {
+                var module = _moduleManager.GetModule<ClineTools.Modules.WhereUsed.WhereUsedModule>();
+                if (module == null)
+                {
+                    System.Windows.Forms.MessageBox.Show(
+                        "WhereUsed module not loaded.",
+                        "ClineTools – Where Used",
+                        System.Windows.Forms.MessageBoxButtons.OK,
+                        System.Windows.Forms.MessageBoxIcon.Error);
+                    return;
+                }
+
+                module.RunWhereUsed();
+            }
+            catch (Exception ex)
+            {
+                DebugTrace.DumpOnError(ex, "WhereUsed");
+                System.Windows.Forms.MessageBox.Show(
+                    "Where Used failed:\n\n" + ex,
+                    "ClineTools – Where Used",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
+            }
+        }
+
+        public int EnableWhereUsed()
+        {
+            if (_swApp == null || !_clineToolsEnabled)
                 return 0;
+
+            var doc = _swApp.IActiveDoc2;
+            if (doc == null)
+                return 0;
+
+            // PART ONLY (per your requirement)
+            return doc.GetType() == (int)swDocumentTypes_e.swDocPART ? 1 : 0;
         }
 
-        public void FlyoutCallback()
-        {
-            FlyoutGroup flyGroup = iCmdMgr.GetFlyoutGroup(flyoutGroupID);
-            flyGroup.RemoveAllCommandItems();
+        #endregion
 
-            flyGroup.AddCommandItem(System.DateTime.Now.ToLongTimeString(), "test", 0, "FlyoutCommandItem1", "FlyoutEnableCommandItem1");
-
-        }
-
-        public int FlyoutEnable()
-        {
-            return 1;
-        }
-
-        public void FlyoutCommandItem1()
-        {
-            iSwApp.SendMsgToUser("Flyout command 1");
-        }
-
-        public int FlyoutEnableCommandItem1()
-        {
-            return 1;
-        }
         #endregion
 
         #region Event Methods
         public bool AttachEventHandlers()
         {
             AttachSwEvents();
-
-            //Listen for events on all currently open docs
-
             AttachEventsToAllDocuments();
             return true;
         }
@@ -658,11 +954,11 @@ namespace ClineTools
         {
             try
             {
-                SwEventPtr.ActiveDocChangeNotify += new DSldWorksEvents_ActiveDocChangeNotifyEventHandler(OnDocChange);
-                SwEventPtr.DocumentLoadNotify2 += new DSldWorksEvents_DocumentLoadNotify2EventHandler(OnDocLoad);
-                SwEventPtr.FileNewNotify2 += new DSldWorksEvents_FileNewNotify2EventHandler(OnFileNew);
-                SwEventPtr.ActiveModelDocChangeNotify += new DSldWorksEvents_ActiveModelDocChangeNotifyEventHandler(OnModelChange);
-                SwEventPtr.FileOpenPostNotify += new DSldWorksEvents_FileOpenPostNotifyEventHandler(FileOpenPostNotify);
+                _swEventPtr.ActiveDocChangeNotify += new DSldWorksEvents_ActiveDocChangeNotifyEventHandler(OnDocChange);
+                _swEventPtr.DocumentLoadNotify2 += new DSldWorksEvents_DocumentLoadNotify2EventHandler(OnDocLoad);
+                _swEventPtr.FileNewNotify2 += new DSldWorksEvents_FileNewNotify2EventHandler(OnFileNew);
+                _swEventPtr.ActiveModelDocChangeNotify += new DSldWorksEvents_ActiveModelDocChangeNotifyEventHandler(OnModelChange);
+                _swEventPtr.FileOpenPostNotify += new DSldWorksEvents_FileOpenPostNotifyEventHandler(FileOpenPostNotify);
                 return true;
             }
             catch (Exception e)
@@ -671,18 +967,16 @@ namespace ClineTools
                 return false;
             }
         }
-
-
 
         private bool DetachSwEvents()
         {
             try
             {
-                SwEventPtr.ActiveDocChangeNotify -= new DSldWorksEvents_ActiveDocChangeNotifyEventHandler(OnDocChange);
-                SwEventPtr.DocumentLoadNotify2 -= new DSldWorksEvents_DocumentLoadNotify2EventHandler(OnDocLoad);
-                SwEventPtr.FileNewNotify2 -= new DSldWorksEvents_FileNewNotify2EventHandler(OnFileNew);
-                SwEventPtr.ActiveModelDocChangeNotify -= new DSldWorksEvents_ActiveModelDocChangeNotifyEventHandler(OnModelChange);
-                SwEventPtr.FileOpenPostNotify -= new DSldWorksEvents_FileOpenPostNotifyEventHandler(FileOpenPostNotify);
+                _swEventPtr.ActiveDocChangeNotify -= new DSldWorksEvents_ActiveDocChangeNotifyEventHandler(OnDocChange);
+                _swEventPtr.DocumentLoadNotify2 -= new DSldWorksEvents_DocumentLoadNotify2EventHandler(OnDocLoad);
+                _swEventPtr.FileNewNotify2 -= new DSldWorksEvents_FileNewNotify2EventHandler(OnFileNew);
+                _swEventPtr.ActiveModelDocChangeNotify -= new DSldWorksEvents_ActiveModelDocChangeNotifyEventHandler(OnModelChange);
+                _swEventPtr.FileOpenPostNotify -= new DSldWorksEvents_FileOpenPostNotifyEventHandler(FileOpenPostNotify);
                 return true;
             }
             catch (Exception e)
@@ -690,15 +984,14 @@ namespace ClineTools
                 Console.WriteLine(e.Message);
                 return false;
             }
-
         }
 
         public void AttachEventsToAllDocuments()
         {
-            ModelDoc2 modDoc = (ModelDoc2)iSwApp.GetFirstDocument();
+            ModelDoc2 modDoc = (ModelDoc2)_swApp.GetFirstDocument();
             while (modDoc != null)
             {
-                if (!openDocs.Contains(modDoc))
+                if (!_openDocs.Contains(modDoc))
                 {
                     AttachModelDocEventHandler(modDoc);
                 }
@@ -713,41 +1006,37 @@ namespace ClineTools
 
             DocumentEventHandler docHandler = null;
 
-            if (!openDocs.Contains(modDoc))
+            if (!_openDocs.Contains(modDoc))
             {
                 switch (modDoc.GetType())
                 {
                     case (int)swDocumentTypes_e.swDocPART:
-                        {
-                            docHandler = new PartEventHandler(modDoc, this);
-                            break;
-                        }
+                        docHandler = new PartEventHandler(modDoc, this);
+                        break;
+
                     case (int)swDocumentTypes_e.swDocASSEMBLY:
-                        {
-                            docHandler = new AssemblyEventHandler(modDoc, this);
-                            break;
-                        }
+                        docHandler = new AssemblyEventHandler(modDoc, this);
+                        break;
+
                     case (int)swDocumentTypes_e.swDocDRAWING:
-                        {
-                            docHandler = new DrawingEventHandler(modDoc, this);
-                            break;
-                        }
+                        docHandler = new DrawingEventHandler(modDoc, this);
+                        break;
+
                     default:
-                        {
-                            return false; //Unsupported document type
-                        }
+                        return false;
                 }
+
                 docHandler.AttachEventHandlers();
-                openDocs.Add(modDoc, docHandler);
+                _openDocs.Add(modDoc, docHandler);
             }
+
             return true;
         }
 
         public bool DetachModelEventHandler(ModelDoc2 modDoc)
         {
-            DocumentEventHandler docHandler;
-            docHandler = (DocumentEventHandler)openDocs[modDoc];
-            openDocs.Remove(modDoc);
+            DocumentEventHandler docHandler = (DocumentEventHandler)_openDocs[modDoc];
+            _openDocs.Remove(modDoc);
             modDoc = null;
             docHandler = null;
             return true;
@@ -757,39 +1046,27 @@ namespace ClineTools
         {
             DetachSwEvents();
 
-            //Close events on all currently open docs
-
             DocumentEventHandler docHandler;
-            int numKeys = openDocs.Count;
-            object[] keys = new Object[numKeys];
+            int numKeys = _openDocs.Count;
+            object[] keys = new object[numKeys];
 
-            //Remove all document event handlers
-
-            openDocs.Keys.CopyTo(keys, 0);
+            _openDocs.Keys.CopyTo(keys, 0);
             foreach (ModelDoc2 key in keys)
             {
-                docHandler = (DocumentEventHandler)openDocs[key];
-                docHandler.DetachEventHandlers(); //This also removes the pair from the hash
+                docHandler = (DocumentEventHandler)_openDocs[key];
+                docHandler.DetachEventHandlers();
                 docHandler = null;
             }
+
             return true;
         }
         #endregion
 
         #region Event Handlers
+        public int OnDocChange() => 0;
+        public int OnDocLoad(string docTitle, string docPath) => 0;
 
-        //Events
-        public int OnDocChange()
-        {
-            return 0;
-        }
-
-        public int OnDocLoad(string docTitle, string docPath)
-        {
-            return 0;
-        }
-
-        int FileOpenPostNotify(string FileName)
+        int FileOpenPostNotify(string fileName)
         {
             AttachEventsToAllDocuments();
             return 0;
@@ -801,11 +1078,7 @@ namespace ClineTools
             return 0;
         }
 
-        public int OnModelChange()
-        {
-            return 0;
-        }
-
+        public int OnModelChange() => 0;
         #endregion
     }
 }
